@@ -50,7 +50,7 @@ def add_to_cart(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt
 def update_cart_item(request: HttpRequest, item_id: uuid.UUID) -> JsonResponse:
-    if request.method == 'POST':
+    if request.method == 'PUT':
         try:
             data = json.loads(request.body)
             quantity = int(data.get('quantity'))
