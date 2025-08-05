@@ -48,7 +48,7 @@ def admin_remove_product(request: HttpRequest, product_id: uuid.UUID) -> JsonRes
 
 @csrf_exempt
 def admin_modify_product(request: HttpRequest, product_id: uuid.UUID) -> JsonResponse:
-    if request.method == 'POST':
+    if request.method == 'PUT':
         try:
             data = json.loads(request.body)
             product = get_object_or_404(Product, id=product_id)
