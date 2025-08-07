@@ -12,7 +12,6 @@ def add_to_cart(request: HttpRequest) -> JsonResponse:
             data = json.loads(request.body)
             product_id = data.get('product_id')
             quantity = data.get('quantity', 1)
-
             user = request.user if request.user.is_authenticated else None
 
             try:

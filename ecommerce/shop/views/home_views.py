@@ -7,11 +7,6 @@ def home(request: HttpRequest) -> JsonResponse:
             'products': '/api/products/',
             'cart': '/api/cart/',
             'admin_panel': '/admin/',
-        },
-        'secure_endpoints': {
-            'add_to_cart': '/api/cart/add/',
-            'checkout': '/api/checkout/',
-        },
-        'status': 'running'
+        }
     })
 
