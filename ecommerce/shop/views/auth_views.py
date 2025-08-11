@@ -1,7 +1,8 @@
 from django.http import JsonResponse, HttpRequest
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authtoken.models import Token
 from typing import cast
 import json
 import re
@@ -36,6 +37,7 @@ def signup(request: HttpRequest) -> JsonResponse:
 
             if User.objects.filter(email=email).exists():
                 return JsonResponse({'error': 'Email already exists'}, status=400)
+                
             user = User.objects.create_user(
                 username=username,
                 email=email,
@@ -59,21 +61,24 @@ def signin(request: HttpRequest) -> JsonResponse:
             data = json.loads(request.body)
             username = data.get('username')
             password = data.get('password')
-
             if not username or not password:
                 return JsonResponse({'error': 'Username and password are required'}, status=400)
             user = authenticate(request, username=username, password=password)
 
             if user is not None:
                 if user.is_active:
-                    login(request, user)
                     authenticated_user = cast(User, user)
+                    Token.objects.filter(user=authenticated_user).delete()
+                    token = Token.objects.create(user=authenticated_user)
+
                     return JsonResponse({
                         'message': 'Login successful',
                         'user_id': authenticated_user.pk,
                         'username': authenticated_user.username,
                         'email': authenticated_user.email,
-                        'is_staff': authenticated_user.is_staff
+                        'is_staff': authenticated_user.is_staff,
+                        'is_superuser': authenticated_user.is_superuser,
+                        'token': token.key
                     })
                 else:
                     return JsonResponse({'error': 'Account is disabled'}, status=400)
@@ -91,8 +96,7 @@ def signout(request: HttpRequest) -> JsonResponse:
         try:
             if request.user.is_authenticated:
                 user = cast(User, request.user)
-                username = user.username
-                logout(request)
+                Token.objects.filter(user=user).delete()
                 return JsonResponse({'message': 'Logged out successfully'})
             else:
                 return JsonResponse({'error': 'No user is currently logged in'}, status=400)
